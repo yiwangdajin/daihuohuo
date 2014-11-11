@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+ 	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<import resource="classpath:db.xml" />
+
+	<bean id="wrappedDataSource"
+		class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+		<property name="targetDataSource" ref="dataSource" />
+	</bean>
+
+    <bean id = "jdbcTemplate" class = "org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="wrappedDataSource" />
+		<property name="mapperLocations" value="classpath*:mybatis/mappers/*.xml" />
+		<property name="typeAliasesPackage" value="com.qunar.insurance.model" />
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.qunar.insurance.dao" />
+	</bean>
+
+    <bean id="txDefinition" class="org.springframework.transaction.support.DefaultTransactionDefinition">
+        <property name="propagationBehaviorName" value="PROPAGATION_REQUIRED" />
+    </bean>
+	<!--  
+	<aop:aspectj-autoproxy proxy-target-class="true"/> -->  
+	<tx:annotation-driven mode="aspectj"/>
+
+</beans>
